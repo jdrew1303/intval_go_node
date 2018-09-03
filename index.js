@@ -53,11 +53,13 @@ function args () {
 	if (INTVAL.indexOf('/index.js') !== -1 || INTVAL.indexOf('/bin/node') !== -1) {
 		exit('Requires 2 arguments', 1)
 	}
-
+	if (VIDEO.indexOf('http://') !== -1 && VIDEO.substring(0, 7) !== 'http://') {
+		VIDEO = `http://${VIDEO}`;
+	}
 }
 
 async function sequence (info) {
-
+	console.dir(info)
 }
 
 async function ffmpeg_frame (time) {
@@ -68,6 +70,20 @@ async function ffmpeg_frame (time) {
 
 async function display_frame (frame) {
 	//timeout 3 eog --fullscreen ${frame}
+}
+
+async function capture_frame () {
+	let framePath = `${VIDEO}/frame`;
+	let res;
+	try{
+		res = await req.get(framePath);
+	} catch (err) {
+		return exit('Error triggering frame', 8);
+	}
+	if (res) {
+		console.log(res);
+	}
+	return true;
 }
 
 
