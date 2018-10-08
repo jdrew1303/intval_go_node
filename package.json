@@ -4,12 +4,35 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "./node_modules/.bin/electron index.js",
+    "dev": "./node_modules/.bin/electron index.js -d",
+    "install": "./node_modules/.bin/electron-rebuild"
   },
   "author": "sixteenmillimeter",
   "license": "ISC",
   "dependencies": {
+    "@ffmpeg-installer/ffmpeg": "^1.0.15",
+    "@ffprobe-installer/ffprobe": "^1.0.9",
+    "capture": "file:lib/capture",
+    "delay": "file:lib/delay",
+    "display": "file:lib/display",
+    "exec": "file:lib/exec",
+    "exit": "file:lib/exit",
+    "ffmpeg": "file:lib/ffmpeg",
+    "ffprobe": "file:lib/ffprobe",
     "fs-extra": "^7.0.0",
-    "request": "^2.88.0"
+    "request": "^2.88.0",
+    "serialport": "^7.0.2",
+    "system": "file:lib/system",
+    "uuid": "^3.3.2"
+  },
+  "devDependencies": {
+    "electron": "^3.0.2",
+    "electron-installer-debian": "^0.8.1",
+    "electron-installer-dmg": "^2.0.0",
+    "electron-packager": "^12.2.0",
+    "electron-rebuild": "^1.8.2",
+    "electron-wix-msi": "^2.1.1"
   }
 }

@@ -1,142 +1,114 @@
 'use strict';
 
-const exec = require('child_process').exec;
+const electron = require('electron');
+const { Menu, MenuItem, ipcMain, BrowserWindow, app } = electron;
 const os = require('os');
-const fs = require('fs-extra');
 const req = require('request');
 
-let INTVAL;
-let VIDEO;
+const delay = require('delay');
+const exit = require('exit');
+const ffprobe = require('ffprobe');
+const ffmepg = require('ffmpeg');
+const display = require('display');
+const capture = require('capture');
+const system = require('system');
 
-function exit (msg, code = 0) {
-	if (code === 0) {
-		console.log(msg);
-		process.exit();
-	} else {
-		console.error(msg);
-		process.exit(code);
+let mainWindow;
+let menu;
+
+let SYSTEM;
+
+async function parseMsg(obj) {
+	let info;
+	let frames;
+	if (obj.type === 'start') {
+
+	} else if (obj.type === 'method') {
+
+	} else if (obj.type === 'video') {
+		try {
+			info = await ffprobe.info(obj.video)
+		} catch (err) {
+			console.error(err);
+		}
+		try {
+			frames = await ffprobe.frames(obj.video)
+		} catch (err) {
+			console.error(err);
+		}
+		//console.dir(info)
+		//console.log(frames)
+		send({ type : 'info', info, frames, name : obj.name, path : obj.video })
 	}
 }
 
-async function asyncExec (cmd) {
-	return new Promise((resolve, reject) => {
-		return exec(cmd, (err, stdio, stderr) => {
-			if (err) return reject(err);
-			return resolve(stdio);
-		});
-	});
+async function send (obj) {
+	mainWindow.send('msg', obj);
 }
 
-async function dependencies () {
-	try {
-		await asyncExec('ffmpeg -h');
-	} catch (err) {
-		return exit('ffmpeg is not installed', 3);
+function createMenu () {
+	const template = require('./data/menu.json')
+	menu = Menu.buildFromTemplate(template)
+	Menu.setApplicationMenu(menu)
+}
+
+async function createWindow () {
+	mainWindow = new BrowserWindow({
+		webPreferences: {
+      		nodeIntegration: true,
+      		allowRunningInsecureContent: false
+    	},
+		width: 300, 
+		height: 400,
+		minWidth : 300,
+		minHeight : 400//,
+		//icon: path.join(__dirname, 'assets/icons/icon.png')
+	})
+	mainWindow.loadURL('file://' + __dirname + '/index.html')
+	if (process.argv.indexOf('-d') !== -1 || process.argv.indexOf('--dev') !== -1) {
+		mainWindow.webContents.openDevTools()
 	}
-	//if linux
-	try {
-		await asyncExec('eog -h');
-	} catch (err) {
-		return exit('eog is not installed', 4);
-	}
-}
+	mainWindow.on('closed', () => {
+		mainWindow = null
+	})
 
-function delay (ms) {
-	return new Promise((resolve) => {
-		setTimeout(resolve, ms);
-	});
-}
-
-function args () {
-	INTVAL = process.argv[process.argv.length - 2];
-	VIDEO = process.argv[process.argv.length - 1];
-	if (INTVAL.indexOf('/index.js') !== -1 || INTVAL.indexOf('/bin/node') !== -1) {
-		exit('Requires 2 arguments', 1)
-	}
-	if (VIDEO.indexOf('http://') !== -1 && VIDEO.substring(0, 7) !== 'http://') {
-		VIDEO = `http://${VIDEO}`;
-	}
-}
-
-async function sequence (info) {
-	console.dir(info)
-}
-
-async function ffmpeg_frame (time) {
-	//ffmpeg -i ${VIDEO} -ss 00:00:07.000 -vframes 1 thumb.jpg
-
-	//ffmpeg -i ${VIDEO} -compression_algo raw -pix_fmt rgb24 output.tiff
-}
-
-async function display_frame (frame) {
-	//timeout 3 eog --fullscreen ${frame}
-}
-
-async function capture_frame () {
-	let framePath = `${VIDEO}/frame`;
-	let res;
-	try{
-		res = await req.get(framePath);
-	} catch (err) {
-		return exit('Error triggering frame', 8);
-	}
-	if (res) {
-		console.log(res);
-	}
 	return true;
 }
 
+async function init () {
 
-async function ffprobe () {
-	let cmd = `ffprobe -v quiet -print_format json -show_format -show_streams "${VIDEO}"`
-	let exists;
 	try {
-		exists = await fs.exists(VIDEO);
+		SYSTEM = await system()
 	} catch (err) {
-		return exit(err, 5);
+		console.error(err);
 	}
-	if (!exists) {
-		return exit(`File ${VIDEO} does not exist`, 6);
-	}
-	return asyncExec(cmd);
-}
 
-async function ffprobe_frames () {
-	let cmd = `ffprobe -v error -count_frames -select_streams v:0 -show_entries stream=nb_read_frames -of default=nokey=1:noprint_wrappers=1 ${VIDEO}`;
-	return asyncExec(cmd);
-}
+	console.dir(SYSTEM);
 
-async function main () {
-	let info;
-	let frames;
-	//check dependencies (ffmpeg, eog, preview)
-	try {
-		await dependencies();
-	} catch (err) {
-		//will exit process on error
-	}
-	//parse arguments
-	args();
-	
-	try {
-		info = await ffprobe();
-	} catch (err) {
-		return exit(err, 2);
-	}
-	try {
-		frames = await ffprobe_frames();
-	} catch (err) {
-		return exit(err, 3);
-	}
-	if (info && frames) {
-		info = JSON.parse(info);
-		frames = parseInt(frames);
-		//console.dir(info);
-		console.log(frames);
-		//for loop exporting video
-	} else {
-		return exit('')
-	}
-}
+	await createWindow();
 
-main();
+	await delay(200);
+
+	send({ type: 'system', system : SYSTEM });
+	//createMenu();
+
+	//await display();
+};
+
+ipcMain.on('msg', (event, arg) => {
+	parseMsg(arg);
+})
+
+app.on('ready', init);
+
+app.on('window-all-closed', () => {
+	//if (process.platform !== 'darwin') {
+		app.quit();
+	//}
+});
+
+app.on('activate', () => {
+	if (mainWindow === null) {
+		createWindow();
+	}
+})

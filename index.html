@@ -1,0 +1,109 @@
+<!doctype html>
+<html>
+<head>
+	<title>intval go</title>
+	<style>
+		h3{
+			text-align: center;
+		}
+		html{
+			padding: 0;
+			margin: 0;
+		}
+		body{
+			background: #272b30;
+			color: #fff;
+			font-family: "Helvetica Nueue", Arial, Helvetica, sans-serif;
+			padding: 0;
+			margin: 0;
+		}
+		input[type="text"],
+		input[type="submit"]{
+			background: transparent;
+			color: #fff;
+			border: 1px solid #fff;
+			font-family: "Helvetica Nueue", Arial, Helvetica, sans-serif;
+			border-radius: 4px;
+			width: 80%;
+			margin: 3px auto;
+			display: block;
+			outline: none !important;
+			padding: 4px 10px;
+		}
+		input[type="submit"]{
+			width: 90%;
+			cursor: pointer;
+		}
+		#file{
+			padding-bottom: 20px;
+		}
+		#methods,
+		#file,
+		#button{
+			margin: 4px auto;
+			width: 80%;
+		}
+		.hide {
+			display: none !important;
+		}
+		#start:hover{
+			background: #00C4A0;
+			border-color: #00C4A0;
+			color: #272b30;
+		}
+		#inputs{
+			margin-top: 20px;
+			margin-bottom: 20px;
+		}
+		#info{
+			width: 90%;
+			background: rgba(255, 255, 255, 0.2);
+			border-radius: 8px;
+			margin: 10px auto;
+			padding: 5px;
+			box-sizing: border-box;
+		}
+		pre{
+			width: 90%;
+			border-radius: 8px;
+			margin: 10px auto;
+			padding: 5px;
+			box-sizing: border-box;
+		}
+	</style>
+</head>
+<body>
+	<h3>intval go</h3>
+	<div id="file">
+		<input type="file" id="video" name="video" accept="video/*" onchange="changeFile();" />
+	</div>
+	<div id="methods">
+		<span>
+			<input type="radio" id="method1" name="method" value="intval3" checked onchange="changeMethod();" placeholder="intval3 address" />
+			intval3
+		</span>
+		<span>
+			<input type="radio" id="method2" name="method" value="arduino" onchange="changeMethod();" placeholder="Arduino address" />
+			Arduino
+		</span>
+	</div>
+	<div id="inputs">
+		<input type="text" id="intval3" name="intval3" />
+		<input type="text" id="arduino" name="arduino" class="hide" />
+	</div>
+	<pre id="system">
+
+
+	</pre>
+	<pre id="info">
+
+
+
+	</pre>
+	<div id="button">
+		<input type="submit" id="start" value="START" />
+	</div>
+
+	<script src="./js/renderer.js"></script>
+</body>
+</html>
