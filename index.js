@@ -18,7 +18,7 @@ let menu;
 
 let SYSTEM;
 
-async function parseMsg(obj) {
+async function parseMsg(evt, obj) {
 	let info;
 	let frames;
 	if (obj.type === 'start') {
@@ -95,17 +95,11 @@ async function init () {
 	//await display();
 };
 
-ipcMain.on('msg', (event, arg) => {
-	parseMsg(arg);
-})
+ipcMain.on('msg', parseMsg)
 
 app.on('ready', init);
 
-app.on('window-all-closed', () => {
-	//if (process.platform !== 'darwin') {
-		app.quit();
-	//}
-});
+app.on('window-all-closed', app.quit);
 
 app.on('activate', () => {
 	if (mainWindow === null) {
