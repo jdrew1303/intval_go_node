@@ -24,6 +24,7 @@
     "fs-extra": "^7.0.0",
     "request": "^2.88.0",
     "serialport": "^7.0.2",
+    "spawn": "file:lib/spawn",
     "system": "file:lib/system",
     "uuid": "^3.3.2"
   },
