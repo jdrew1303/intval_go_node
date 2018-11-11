@@ -5,13 +5,15 @@ const { Menu, MenuItem, ipcMain, BrowserWindow, app } = electron;
 const os = require('os');
 const req = require('request');
 
+const system = require('system');
+
 const delay = require('delay');
 const exit = require('exit');
 const ffprobe = require('ffprobe');
-const ffmepg = require('ffmpeg');
-const display = require('display');
+const ffmpeg = require('ffmpeg');
 const capture = require('capture');
-const system = require('system');
+let display;
+
 
 let mainWindow;
 let menu;
@@ -22,7 +24,7 @@ async function parseMsg(evt, obj) {
 	let info;
 	let frames;
 	if (obj.type === 'start') {
-
+		start();
 	} else if (obj.type === 'method') {
 
 	} else if (obj.type === 'video') {
@@ -83,6 +85,8 @@ async function init () {
 		console.error(err);
 	}
 
+	display = require('display')(SYSTEM);
+
 	console.dir(SYSTEM);
 
 	await createWindow();
@@ -93,7 +97,11 @@ async function init () {
 	//createMenu();
 
 	//await display();
-};
+}
+
+async function start () {
+
+}
 
 ipcMain.on('msg', parseMsg)
 
