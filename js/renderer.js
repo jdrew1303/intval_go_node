@@ -71,7 +71,7 @@ var start = function () {
 	document.getElementById('info').innerHTML = `Processing...
 
 	`
-	msg({ method: 'start' , name, video : path });
+	msg({ type: 'start' , name, video : path });
 }
 
 var msg = function (obj) {

@@ -9,16 +9,27 @@ const system = require('system');
 
 const delay = require('delay');
 const exit = require('exit');
-const ffprobe = require('ffprobe');
-const ffmpeg = require('ffmpeg');
-const capture = require('capture');
-let display;
 
+let capture;
+let display;
+let ffmpeg;
+let ffprobe;
 
 let mainWindow;
 let menu;
 
 let SYSTEM;
+let RUNNING = false;
+let COUNT = 0;
+let LENGTH = 0;
+let VIDEO;
+
+/**
+ * Parse an message from the main window. Calls the appropriate function.
+ * 
+ * @param evt Object 
+ * @param obj Object Data from message
+ */
 
 async function parseMsg(evt, obj) {
 	let info;
@@ -28,6 +39,7 @@ async function parseMsg(evt, obj) {
 	} else if (obj.type === 'method') {
 
 	} else if (obj.type === 'video') {
+
 		try {
 			info = await ffprobe.info(obj.video)
 		} catch (err) {
@@ -38,11 +50,21 @@ async function parseMsg(evt, obj) {
 		} catch (err) {
 			console.error(err);
 		}
+
+		VIDEO = obj.video;
+		LENGTH = frames;
+		
 		//console.dir(info)
 		//console.log(frames)
 		send({ type : 'info', info, frames, name : obj.name, path : obj.video })
 	}
 }
+
+/**
+ * Send a message to the main window.
+ *
+ * @param evt Object Data of the message
+ */
 
 async function send (obj) {
 	mainWindow.send('msg', obj);
@@ -53,6 +75,10 @@ function createMenu () {
 	menu = Menu.buildFromTemplate(template)
 	Menu.setApplicationMenu(menu)
 }
+
+/**
+ * Create the main window
+ */
 
 async function createWindow () {
 	mainWindow = new BrowserWindow({
@@ -74,6 +100,8 @@ async function createWindow () {
 		mainWindow = null
 	})
 
+	ipcMain.on('msg', parseMsg);
+
 	return true;
 }
 
@@ -85,7 +113,11 @@ async function init () {
 		console.error(err);
 	}
 
+	capture = require('capture')(SYSTEM);
 	display = require('display')(SYSTEM);
+	ffmpeg = require('ffmpeg')(SYSTEM);
+	ffprobe = require('ffprobe')(SYSTEM);
+
 
 	console.dir(SYSTEM);
 
@@ -101,9 +133,39 @@ async function init () {
 
 async function start () {
 
+	console.log(`Started sequence of video '${VIDEO}'`);
+
+	RUNNING = true;
+	COUNT = 0;
+
+	await step();
 }
 
-ipcMain.on('msg', parseMsg)
+async function step () {
+	if (RUNNING) {
+		//render frame
+		try {
+			await ffmpeg.frame(VIDEO, COUNT);
+		} catch (err) {
+			console.error(err);
+		}
+		//wipe frame
+		try {
+			await ffmpeg.clear(COUNT);
+		} catch (err) {
+			console.error(err);
+		}
+		COUNT++;
+	}
+	console.log(`${COUNT}:${LENGTH}`);
+	if (COUNT === LENGTH) RUNNING = false;
+
+	if (!RUNNING) {
+		console.log('Sequence stopped');
+	} else {
+		await step();
+	}
+}
 
 app.on('ready', init);
 
