@@ -5,21 +5,25 @@
 	<style>
 	body{
 		background: #000;
+		padding: 0;
+		margin: 0;
+		max-width: 100%;
+		max-height: 100vh;
 	}
 	body.meter {
 		background: rgb(117, 117, 117);
 	}
 	#img {
-		position: fixed;
-		top: 0;
-		bottom: 0;
-		left: 0;
-		right: 0;
-		background-size: 100%;
-		max-width: 100%;
-		max-height: 100%;
-		margin: auto;
-		overflow: auto;
+		position: absolute;
+	    /*background-image: url(".../img/background.jpg");*/
+	    background-repeat:no-repeat;
+	    background-size: contain;
+  		background-position: center;
+	    top: 0;
+	    left: 0;
+	    right: 0;
+	    bottom: 0;
+
 	}
 	#can{
 		margin: 0;
@@ -35,8 +39,8 @@
 	</style>
 </head>
 <body>
-	<img id="img">
-	</img>
+	<div id="img">
+	</div>
 	<canvas id="can">
 	</canvas>
 	<script>
@@ -51,12 +55,14 @@
 				if (body.classList.contains('meter')) {
 					body.classList.remove('meter')
 				}
-				img.onload = () => {
-					document.body.appendChild(img)
-					return resolve(img)
-				}
-				img.onerror = reject
-				img.src = src
+
+				img.style.backgroundImage = `url('${src}')`;
+				//img.onload = () => {
+					//document.body.appendChild(img)
+					//return resolve(img)
+				//}
+				//img.onerror = reject
+				//img.src = src
 			})
 		}
 		async function setMeter () {
@@ -111,6 +117,7 @@
 			}
 		}
 		async function onDigital (event, arg) {
+			console.log('called')
 			if (arg.src) {
 				try {
 					await setImage(arg.src)

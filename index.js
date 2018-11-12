@@ -53,7 +53,7 @@ async function parseMsg(evt, obj) {
 
 		VIDEO = obj.video;
 		LENGTH = frames;
-		
+
 		//console.dir(info)
 		//console.log(frames)
 		send({ type : 'info', info, frames, name : obj.name, path : obj.video })
@@ -149,6 +149,10 @@ async function step () {
 		} catch (err) {
 			console.error(err);
 		}
+
+		display.start(COUNT);
+		await delay(3000);
+		display.end();
 		//wipe frame
 		try {
 			await ffmpeg.clear(COUNT);
