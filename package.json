@@ -30,10 +30,12 @@
   },
   "devDependencies": {
     "electron": "^3.0.2",
-    "electron-installer-debian": "^0.8.1",
     "electron-installer-dmg": "^2.0.0",
     "electron-packager": "^12.2.0",
     "electron-rebuild": "^1.8.2",
     "electron-wix-msi": "^2.1.1"
+  },
+  "optionalDependencies": {
+    "electron-installer-debian": "^0.8.1"
   }
 }
