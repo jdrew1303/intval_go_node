@@ -33,7 +33,9 @@
     "electron-installer-dmg": "^2.0.0",
     "electron-packager": "^12.2.0",
     "electron-rebuild": "^1.8.2",
-    "electron-wix-msi": "^2.1.1"
+    "electron-wix-msi": "^2.1.1",
+    "eslint": "^5.12.0",
+    "jsdoc-to-markdown": "^4.0.1"
   },
   "optionalDependencies": {
     "electron-installer-debian": "^0.8.1"
