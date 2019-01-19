@@ -25,11 +25,11 @@ let LENGTH = 0;
 let VIDEO;
 
 /**
- * Parse an message from the main window. Calls the appropriate function.
+ * Parse a message from the main window. Calls the appropriate function.
  * 
- * @param evt Object 
- * @param obj Object Data from message
- */
+ * @param {Object} evt
+ * @param {Object} obj Data from message
+ **/
 
 async function parseMsg(evt, obj) {
 	let info;
@@ -41,12 +41,12 @@ async function parseMsg(evt, obj) {
 	} else if (obj.type === 'video') {
 
 		try {
-			info = await ffprobe.info(obj.video)
+			info = await ffprobe.info(obj.video);
 		} catch (err) {
 			console.error(err);
 		}
 		try {
-			frames = await ffprobe.frames(obj.video)
+			frames = await ffprobe.frames(obj.video);
 		} catch (err) {
 			console.error(err);
 		}
@@ -56,28 +56,32 @@ async function parseMsg(evt, obj) {
 
 		//console.dir(info)
 		//console.log(frames)
-		send({ type : 'info', info, frames, name : obj.name, path : obj.video })
+		send({ type : 'info', info, frames, name : obj.name, path : obj.video });
 	}
 }
 
 /**
  * Send a message to the main window.
  *
- * @param evt Object Data of the message
+ * @param {Object} evt Data of the message
  */
 
 async function send (obj) {
 	mainWindow.send('msg', obj);
 }
 
+/**
+ * Create menu from a menu.json config file.
+ *
+ */
 function createMenu () {
-	const template = require('./data/menu.json')
-	menu = Menu.buildFromTemplate(template)
-	Menu.setApplicationMenu(menu)
+	const template = require('./data/menu.json');
+	menu = Menu.buildFromTemplate(template);
+	Menu.setApplicationMenu(menu);
 }
 
 /**
- * Create the main window
+ * Create the main window.
  */
 
 async function createWindow () {
@@ -91,24 +95,26 @@ async function createWindow () {
 		minWidth : 300,
 		minHeight : 400//,
 		//icon: path.join(__dirname, 'assets/icons/icon.png')
-	})
-	mainWindow.loadURL('file://' + __dirname + '/index.html')
+	});
+	mainWindow.loadURL('file://' + __dirname + '/index.html');
 	if (process.argv.indexOf('-d') !== -1 || process.argv.indexOf('--dev') !== -1) {
-		mainWindow.webContents.openDevTools()
+		mainWindow.webContents.openDevTools();
 	}
 	mainWindow.on('closed', () => {
-		mainWindow = null
-	})
+		mainWindow = null;
+	});
 
 	ipcMain.on('msg', parseMsg);
 
 	return true;
 }
 
+/**
+ * Initialize process.
+ */
 async function init () {
-
 	try {
-		SYSTEM = await system()
+		SYSTEM = await system();
 	} catch (err) {
 		console.error(err);
 	}
@@ -118,7 +124,6 @@ async function init () {
 	ffmpeg = require('ffmpeg')(SYSTEM);
 	ffprobe = require('ffprobe')(SYSTEM);
 
-
 	console.dir(SYSTEM);
 
 	await createWindow();
@@ -126,21 +131,37 @@ async function init () {
 	await delay(200);
 
 	send({ type: 'system', system : SYSTEM });
-	//createMenu();
-
-	//await display();
 }
 
+/**
+ * Start showing video.
+ */
 async function start () {
-
 	console.log(`Started sequence of video '${VIDEO}'`);
 
 	RUNNING = true;
 	COUNT = 0;
 
-	await step();
+	for (let i = 0; i < LENGTH; i++) {
+		console.log(`${i}:${LENGTH}`);
+		if (i === LENGTH) RUNNING = false;
+
+		if (!RUNNING) {
+			console.log('Sequence stopped');
+			break;
+		} else {
+			try {
+				await step();
+			} catch (err) {
+				console.error(err);
+			}
+		}
+	}
 }
 
+/**
+ * Export and display each frame.
+ */
 async function step () {
 	if (RUNNING) {
 		//render frame
@@ -151,7 +172,7 @@ async function step () {
 		}
 
 		display.start(COUNT);
-		await delay(3000);
+		await delay(5000);
 		display.end();
 		//wipe frame
 		try {
@@ -160,14 +181,6 @@ async function step () {
 			console.error(err);
 		}
 		COUNT++;
-	}
-	console.log(`${COUNT}:${LENGTH}`);
-	if (COUNT === LENGTH) RUNNING = false;
-
-	if (!RUNNING) {
-		console.log('Sequence stopped');
-	} else {
-		await step();
 	}
 }
 
@@ -179,4 +192,4 @@ app.on('activate', () => {
 	if (mainWindow === null) {
 		createWindow();
 	}
-})
+});
